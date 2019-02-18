@@ -82,6 +82,7 @@ func freeStorage(path string) {
 var uid int
 var userName string
 var homePath string
+var sudoerUID int
 
 func main() {
 
@@ -113,9 +114,21 @@ func main() {
 		if uid != 0 {
 			userName = user.Username
 		}
+
 		userName, ok := os.LookupEnv("SUDO_USER")
 		if !ok {
 			fmt.Printf("[ERROR] Failed to obtain non-sudo user: %s\n", err)
+			os.Exit(1)
+		}
+
+		sudoerUIDi, ok := os.LookupEnv("SUDO_UID")
+		if !ok {
+			fmt.Printf("[ERROR] Failed to obtain non-sudo UID: %s\n", err)
+			os.Exit(1)
+		}
+		sudoerUID, err = strconv.Atoi(sudoerUIDi)
+		if err != nil {
+			fmt.Print("[ERROR] Unable to convert UID to INT\n")
 			os.Exit(1)
 		}
 
@@ -246,9 +259,15 @@ func main() {
 	timeDateStamp := timeDate()
 	if _, err := os.Stat(dumpDir + "/"); os.IsNotExist(err) {
 		os.Mkdir(dumpDir, 0644)
+		if platform != "windows" {
+			os.Chown(dumpDir, sudoerUID, sudoerUID)
+		}
 	}
 	if _, err := os.Stat(dumpDir + "/" + timeDateStamp + "/"); os.IsNotExist(err) {
 		os.Mkdir(dumpDir+"/"+timeDateStamp, 0644)
+		if platform != "windows" {
+			os.Chown(dumpDir+"/"+timeDateStamp, sudoerUID, sudoerUID)
+		}
 	}
 
 	// Copy files over
@@ -256,6 +275,9 @@ func main() {
 		if len(cachedFile[i]) > 0 {
 			if _, err := os.Stat(dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/"); os.IsNotExist(err) {
 				os.Mkdir(dumpDir+"/"+timeDateStamp+"/"+discordBuildName[i], 0644)
+				if platform != "windows" {
+					os.Chown(dumpDir+"/"+timeDateStamp+"/"+discordBuildName[i], sudoerUID, sudoerUID)
+				}
 			}
 
 			fmt.Printf("Copying %d files from Discord %s ...\n", len(cachedFile[i]), discordBuildName[i])
