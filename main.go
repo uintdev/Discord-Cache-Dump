@@ -109,18 +109,6 @@ func main() {
 		homePath = user.HomeDir
 	}
 
-	if platform == "darwin" {
-		uidenv, ok := os.LookupEnv("UID")
-		if !ok {
-			fmt.Printf("[ERROR] Failed to obtain UID from env: %s\n", err)
-			os.Exit(1)
-		}
-		uidenvchk, err := strconv.Atoi(uidenv)
-		if err == nil {
-			uid = uidenvchk
-		}
-	}
-
 	if platform != "windows" {
 		if uid != 0 {
 			userName = user.Username
