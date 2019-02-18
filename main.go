@@ -117,19 +117,18 @@ func main() {
 
 		userName, ok := os.LookupEnv("SUDO_USER")
 		if !ok {
-			fmt.Printf("[ERROR] Failed to obtain non-sudo user: %s\n", err)
-			os.Exit(1)
+			userName = user.Username
 		}
 
 		sudoerUIDi, ok := os.LookupEnv("SUDO_UID")
 		if !ok {
-			fmt.Printf("[ERROR] Failed to obtain non-sudo UID: %s\n", err)
-			os.Exit(1)
-		}
-		sudoerUID, err = strconv.Atoi(sudoerUIDi)
-		if err != nil {
-			fmt.Print("[ERROR] Unable to convert UID to INT\n")
-			os.Exit(1)
+			sudoerUID = uid
+		} else {
+			sudoerUID, err = strconv.Atoi(sudoerUIDi)
+			if err != nil {
+				fmt.Print("[ERROR] Unable to convert UID to INT\n")
+				os.Exit(1)
+			}
 		}
 
 		if platform == "darwin" {
