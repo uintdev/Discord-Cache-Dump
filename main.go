@@ -161,7 +161,7 @@ func main() {
 	// Cache paths for each platform
 	cachePath := map[string]string{
 		"linux":   "%s/.config/%s/Cache/",
-		"darwin":  "%s/Library/Application\\ Support/%s/Cache/",
+		"darwin":  "%s/Library/Application Support/%s/Cache/",
 		"windows": "%s\\AppData\\Roaming\\%s\\Cache\\",
 	}
 
