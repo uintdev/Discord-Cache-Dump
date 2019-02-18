@@ -19,16 +19,20 @@ const (
 	dumpDir     = "dump"
 )
 
+var platform = runtime.GOOS
+
 // Check for root, as running the program with it can change the path
-func rootCheck(tuid string) {
-	uid, err := strconv.Atoi(tuid)
-	if err != nil {
-		fmt.Print("[ERROR] Unable to obtain UID\n")
-		os.Exit(1)
-	}
-	if uid == 0 {
-		fmt.Print("[WARN] This program is running as root\n")
-		fmt.Print("[...] Unless you are logged in as root, this will not check with the actual user you have logged in as.\n\n")
+func rootCheck(tuid int) {
+	if tuid == 0 {
+		if platform != "darwin" {
+			fmt.Print("[WARN] This program is running as root\n")
+			fmt.Print("[...] Unless you are logged in as root, this will not check with the actual user you have logged in as.\n\n")
+		}
+	} else {
+		if platform == "darwin" {
+			fmt.Print("[ERROR] Due to file permissions, this must be ran as root on macOS\n")
+			os.Exit(1)
+		}
 	}
 }
 
@@ -75,21 +79,62 @@ func freeStorage(path string) {
 	return
 }
 
-func main() {
-	fmt.Print("\n")
-	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 2\n\n", softVersion)
+var uid int
+var userName string
+var homePath string
 
-	platform := runtime.GOOS
+func main() {
+
+	fmt.Print("\n")
+	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 3\n\n", softVersion)
 
 	user, err := user.Current()
 	if err != nil {
-		fmt.Printf("[ERROR] Failed to obtain user: %s\n", err)
-		os.Exit(1)
+		if platform != "darwin" {
+			fmt.Printf("[ERROR] Failed to obtain user: %s\n", err)
+			os.Exit(1)
+		}
+	} else {
+		if platform != "windows" {
+			uidconv, err := strconv.Atoi(user.Uid)
+			if err != nil {
+				fmt.Print("[ERROR] Unable to obtain UID\n")
+				os.Exit(1)
+			}
+			uid = uidconv
+		} else {
+			uid = -1
+		}
+		userName = user.Username
+		homePath = user.HomeDir
 	}
 
-	userName := user.Username
-	homePath := user.HomeDir
-	uid := user.Uid
+	if platform == "darwin" {
+		uidenv, ok := os.LookupEnv("UID")
+		if !ok {
+			fmt.Printf("[ERROR] Failed to obtain UID from env: %s\n", err)
+			os.Exit(1)
+		}
+		uidenvchk, err := strconv.Atoi(uidenv)
+		if err == nil {
+			uid = uidenvchk
+		}
+	}
+
+	if platform != "windows" {
+		if uid != 0 {
+			userName = user.Username
+		}
+		userName, ok := os.LookupEnv("SUDO_USER")
+		if !ok {
+			fmt.Printf("[ERROR] Failed to obtain non-sudo user: %s\n", err)
+			os.Exit(1)
+		}
+
+		if platform == "darwin" {
+			homePath = "/Users/" + userName
+		}
+	}
 
 	// Check the platform in use and adjust as appropriate
 	if platform == "linux" || platform == "darwin" {
@@ -141,10 +186,11 @@ func main() {
 
 	// Check if directories exist
 	for i := 0; i < len(discordBuildDir); i++ {
-		filepath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
+		filePath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
+		fmt.Printf("DEBUG: %s\n", filePath)
 		//fmt.Printf(cachePath[platform]+"\n", homePath, discordBuildDir[i])
 
-		if _, err := os.Stat(filepath); !os.IsNotExist(err) {
+		if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 			fmt.Printf("Found: Discord %s\n", discordBuildName[i])
 			pathStatus[i] = true
 		} else {
