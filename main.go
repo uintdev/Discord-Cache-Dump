@@ -42,14 +42,19 @@ func timeDate() string {
 	return timeDat
 }
 
-var unreadableResources = 0
+// Initialisation of file stats variables
+var unreadableResources int64
 var overallSize int64
 var spareStorage int64
 
 // Copy source file to destination
-func copyFile(from string, to string) {
+func copyFile(from string, to string, permuid int) {
 	input, err := ioutil.ReadFile(from)
 	if err != nil {
+		/*
+			We simply assume that the file it got to cannot be 'opened' because Discord's process is using it at the time.
+			Yes, as any other error could occur for whatever reason, it is not the best way to go but it's good enough.
+		*/
 		unreadableResources++
 		return
 	}
@@ -58,6 +63,10 @@ func copyFile(from string, to string) {
 	if err != nil {
 		fmt.Printf("\n[ERROR] Write error: %s\n", err)
 		return
+	}
+	// If ran as root as a sudoer on Linux or macOS, it's going to be root:root, so we change it to what it really should be
+	if platform != "windows" {
+		os.Chown(to, permuid, permuid)
 	}
 }
 
@@ -79,30 +88,28 @@ func freeStorage(path string) {
 	return
 }
 
+// Initialisation of system information variables
 var uid int
 var userName string
 var homePath string
 var sudoerUID int
 
 func main() {
-
 	fmt.Print("\n")
 	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 3\n\n", softVersion)
 
 	user, err := user.Current()
 	if err != nil {
-		if platform != "darwin" {
-			fmt.Printf("[ERROR] Failed to obtain user: %s\n", err)
-			os.Exit(1)
-		}
+		fmt.Printf("[ERROR] Failed to obtain user: %s\n", err)
+		os.Exit(1)
 	} else {
 		if platform != "windows" {
-			uidconv, err := strconv.Atoi(user.Uid)
+			uidConv, err := strconv.Atoi(user.Uid)
 			if err != nil {
 				fmt.Print("[ERROR] Unable to obtain UID\n")
 				os.Exit(1)
 			}
-			uid = uidconv
+			uid = uidConv
 		} else {
 			uid = -1
 		}
@@ -111,15 +118,13 @@ func main() {
 	}
 
 	if platform != "windows" {
-		if uid != 0 {
-			userName = user.Username
-		}
-
+		// Get the sudoer user
 		userName, ok := os.LookupEnv("SUDO_USER")
 		if !ok {
 			userName = user.Username
 		}
 
+		// Get the sudoer UID
 		sudoerUIDi, ok := os.LookupEnv("SUDO_UID")
 		if !ok {
 			sudoerUID = uid
@@ -131,7 +136,8 @@ func main() {
 			}
 		}
 
-		if platform == "darwin" {
+		// Correct the path if logged in user isn't root
+		if platform == "darwin" && sudoerUID != 0 {
 			homePath = "/Users/" + userName
 		}
 	}
@@ -140,6 +146,7 @@ func main() {
 	if platform == "linux" || platform == "darwin" {
 		rootCheck(uid)
 	} else if platform == "windows" {
+		// Windows does not return just the username, so we split and grab what we need
 		userName = strings.Split(userName, "\\")[1]
 	} else {
 		fmt.Printf("[ERROR] Unsupported platform: %s\n", platform)
@@ -180,15 +187,13 @@ func main() {
 	// Initialise a few maps
 	pathStatus := make(map[int]bool)
 	cachedFile := make(map[int]map[int]string)
-	//cachedFileExt := make(map[int]map[int]string)
 
 	fmt.Print("Checking for existing cache directories ...\n\n")
 
 	// Check if directories exist
 	for i := 0; i < len(discordBuildDir); i++ {
 		filePath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
-		fmt.Printf("DEBUG: %s\n", filePath)
-		//fmt.Printf(cachePath[platform]+"\n", homePath, discordBuildDir[i])
+		fmt.Printf("DEBUG: %s\n", filePath) // DEBUG
 
 		if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 			fmt.Printf("Found: Discord %s\n", discordBuildName[i])
@@ -200,7 +205,7 @@ func main() {
 
 	fmt.Print("\n")
 
-	// Check if the directories are empty and store names of cached files for later on
+	// Check if the directories are empty and store names of cached files
 	for i := 0; i < len(discordBuildDir); i++ {
 		if pathStatus[i] {
 			filePath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
@@ -209,6 +214,7 @@ func main() {
 				fmt.Printf("[ERROR] Unable to read directory for Discord %s\n", discordBuildName[i])
 				os.Exit(1)
 			}
+			// Go through the list of files present in a cache directory
 			if len(cacheListing) > 0 {
 				cachedFile[i] = make(map[int]string)
 				for k, v := range cacheListing {
@@ -233,11 +239,11 @@ func main() {
 		}
 	}
 	if pathStatusSuccessCount == 0 {
-		fmt.Print("[ERROR] No cache found\n")
-		os.Exit(1)
+		fmt.Print("No cache found\n")
+		os.Exit(0)
 	}
 
-	// Check space requirements
+	// Check storage requirements
 	curDir, err := os.Getwd()
 	if err != nil {
 		fmt.Print("[ERROR] Unable to obtain current directory\n")
@@ -246,7 +252,8 @@ func main() {
 	freeStorage(curDir)
 	remainingStorage := spareStorage - overallSize
 	if remainingStorage <= 0 {
-		requiredSpace := strings.Replace(fmt.Sprintf("%v", remainingStorage), "-", "", -1) // Remove '-' for a look that makes more sense
+		// The character '-' is removed for an appearance that makes more sense
+		requiredSpace := strings.Replace(fmt.Sprintf("%v", remainingStorage), "-", "", -1)
 		fmt.Print("[ERROR] Insufficient storage where program is being ran\n")
 		fmt.Printf("[...] %s bytes need sparing\n", requiredSpace)
 		os.Exit(1)
@@ -269,7 +276,7 @@ func main() {
 		}
 	}
 
-	// Copy files over
+	// Create any Discord client directories that are required
 	for i := 0; i < len(discordBuildDir); i++ {
 		if len(cachedFile[i]) > 0 {
 			if _, err := os.Stat(dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/"); os.IsNotExist(err) {
@@ -279,25 +286,26 @@ func main() {
 				}
 			}
 
+			// Copy the files over
 			fmt.Printf("Copying %d files from Discord %s ...\n", len(cachedFile[i]), discordBuildName[i])
 			for it := 0; it < len(cachedFile[i]); it++ {
-				// copy func
+				// Build the paths to use during the copy operation
 				fromPath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
 				toPath := dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/" + cachedFile[i][it]
-
-				copyFile(fromPath+cachedFile[i][it], toPath) // Copy files
+				// Copying the files one-by-one
+				copyFile(fromPath+cachedFile[i][it], toPath, sudoerUID)
 			}
 
 			// Unable to copy client-critial cache
 			if unreadableResources > 0 {
 				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
 				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableResources)
-				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", len(cachedFile[i])-unreadableResources, discordBuildName[i])
+				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", int64(len(cachedFile[i]))-unreadableResources, discordBuildName[i])
 			}
 		}
 	}
 
-	// Analyse and rename files...
+	// Analyse and rename files
 	fmt.Print("\n")
 	fmt.Print("Analysing copied files ...\n")
 
@@ -307,11 +315,11 @@ func main() {
 			var identificationCount = 0
 			for it := 0; it < len(cachedFile[i]); it++ {
 				cachedFilePath := dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/" + cachedFile[i][it]
-
 				buf, err := ioutil.ReadFile(cachedFilePath)
 				if err == nil {
 					kind, _ := filetype.Match(buf)
 					if kind != filetype.Unknown {
+						// Rename files with an appended file extension if we know the file type
 						os.Rename(cachedFilePath, cachedFilePath+"."+kind.Extension)
 						identificationCount++
 					}
