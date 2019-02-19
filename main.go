@@ -96,7 +96,7 @@ var sudoerUID int
 
 func main() {
 	fmt.Print("\n")
-	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 3\n\n", softVersion)
+	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 4\n\n", softVersion)
 
 	user, err := user.Current()
 	if err != nil {
@@ -137,8 +137,13 @@ func main() {
 		}
 
 		// Correct the path if logged in user isn't root
-		if platform == "darwin" && sudoerUID != 0 {
-			homePath = "/Users/" + userName
+		if sudoerUID != 0 {
+			if platform == "darwin" {
+				homePath = "/Users/" + userName
+			} else if platform == "linux" {
+				// This assumes that the user was not assigned another 'home' directory
+				homePath = "/home/" + userName
+			}
 		}
 	}
 
@@ -239,7 +244,7 @@ func main() {
 		}
 	}
 	if pathStatusSuccessCount == 0 {
-		fmt.Print("No cache found\n")
+		fmt.Print("No cache found\n\n")
 		os.Exit(0)
 	}
 
