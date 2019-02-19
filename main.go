@@ -30,7 +30,7 @@ func rootCheck(tuid int) {
 		}
 	} else {
 		if platform == "darwin" {
-			fmt.Print("[ERROR] Due to file permissions, this must be ran as root on macOS\n\n")
+			fmt.Print("[ERROR] Due to file permissions, this must be ran as root on macOS\n")
 			os.Exit(1)
 		}
 	}
@@ -96,7 +96,10 @@ var sudoerUID int
 
 func main() {
 	fmt.Print("\n")
-	fmt.Printf("Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 4\n\n", softVersion)
+	// Banner
+	fmt.Print("###########################################################\n")
+	fmt.Printf("# Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 4 #\n", softVersion)
+	fmt.Print("###########################################################\n\n")
 
 	user, err := user.Current()
 	if err != nil {
@@ -160,10 +163,13 @@ func main() {
 
 	fmt.Printf("User used to execute this program: %s\n\n", userName)
 
-	fmt.Print("[NOTICE] A few files (index, data_0-3) are in use by Discord while it is running.\n")
-	fmt.Print("[...] To also dump those files, kill all instances of Discord before continuing.\n")
-	fmt.Print("[...] There will be a notice regarding this per installed Discord build\n")
-	fmt.Print("[...] where applicable while copying the files over.\n\n")
+	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+	fmt.Print("!! A few files (index, data_0-3) are in use by Discord while    !!\n")
+	fmt.Print("!! it is running. To also dump those files, kill all instances  !!\n")
+	fmt.Print("!! of Discord before continuing. There will be a notice         !!\n")
+	fmt.Print("!! regarding this per installed Discord build where applicable  !!\n")
+	fmt.Print("!! while copying the files over.                                !!\n")
+	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 
 	fmt.Print("Press enter to continue ...\n")
 	fmt.Scanln()
@@ -244,7 +250,7 @@ func main() {
 		}
 	}
 	if pathStatusSuccessCount == 0 {
-		fmt.Print("No cache found\n\n")
+		fmt.Print("No cache found\n")
 		os.Exit(0)
 	}
 
@@ -255,9 +261,8 @@ func main() {
 		os.Exit(1)
 	}
 	freeStorage(curDir)
-	remainingStorage := spareStorage - overallSize
-	if remainingStorage <= 0 {
-		// The character '-' is removed for an appearance that makes more sense
+	if spareStorage <= overallSize {
+		remainingStorage := spareStorage - overallSize
 		requiredSpace := strings.Replace(fmt.Sprintf("%v", remainingStorage), "-", "", -1)
 		fmt.Print("[ERROR] Insufficient storage where program is being ran\n")
 		fmt.Printf("[...] %s bytes need sparing\n", requiredSpace)
@@ -305,11 +310,8 @@ func main() {
 			if unreadableRes > 0 {
 				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
 				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableRes)
-				finalUnreadableResCount := int64(len(cachedFile[i])) - unreadableRes
-				if finalUnreadableResCount < 0 {
-					finalUnreadableResCount = 0
-				}
-				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", finalUnreadableResCount, discordBuildName[i])
+				unreadableResCount := int64(len(cachedFile[i])) - unreadableRes
+				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", unreadableResCount, discordBuildName[i])
 			}
 		}
 	}
