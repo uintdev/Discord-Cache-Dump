@@ -30,7 +30,7 @@ func rootCheck(tuid int) {
 		}
 	} else {
 		if platform == "darwin" {
-			fmt.Print("[ERROR] Due to file permissions, this must be ran as root on macOS\n")
+			fmt.Print("[ERROR] Due to file permissions, this must be ran as root on macOS\n\n")
 			os.Exit(1)
 		}
 	}
@@ -43,7 +43,7 @@ func timeDate() string {
 }
 
 // Initialisation of file stats variables
-var unreadableResources int64
+var unreadableRes int64
 var overallSize int64
 var spareStorage int64
 
@@ -55,7 +55,7 @@ func copyFile(from string, to string, permuid int) {
 			We simply assume that the file it got to cannot be 'opened' because Discord's process is using it at the time.
 			Yes, as any other error could occur for whatever reason, it is not the best way to go but it's good enough.
 		*/
-		unreadableResources++
+		unreadableRes++
 		return
 	}
 
@@ -302,10 +302,14 @@ func main() {
 			}
 
 			// Unable to copy client-critial cache
-			if unreadableResources > 0 {
+			if unreadableRes > 0 {
 				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
-				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableResources)
-				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", int64(len(cachedFile[i]))-unreadableResources, discordBuildName[i])
+				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableRes)
+				finalUnreadableResCount := int64(len(cachedFile[i])) - unreadableRes
+				if finalUnreadableResCount < 0 {
+					finalUnreadableResCount = 0
+				}
+				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", finalUnreadableResCount, discordBuildName[i])
 			}
 		}
 	}
@@ -330,7 +334,7 @@ func main() {
 					}
 				}
 			}
-			fmt.Printf("%d out of %d has been identified for Discord %s\n\n", identificationCount, len(cachedFile[i]), discordBuildName[i])
+			fmt.Printf("%d out of %d identified for Discord %s\n\n", identificationCount, len(cachedFile[i]), discordBuildName[i])
 		}
 	}
 
