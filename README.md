@@ -11,7 +11,7 @@ Discord Cache Dump is a tool that gathers the cache of all known Electron Discor
 - Discloses count of amount of files it is unable to gather at the time for that particular build
 - Supports Windows, GNU/Linux, and macOS
 - Checks storage available where the program is being ran before copying
-- Dumps are timestamped along with the cache being in their build type directories
+- Dumps are timestamped along with the cache being in their own build type directories
 
 ## Known limitations
 
@@ -33,7 +33,7 @@ The following files are known to be constantly used by Discord and so cannot be 
 
 ## Prerequisites
 
-In order to compile the tool, there are a few things to get it set up.
+In order to compile the tool, there are a few things required to get it set up.
 
 - Go (compiling)
 - [h2non/filetype](https://github.com/h2non/filetype) (recognition of file types and extensions): `go get github.com/h2non/filetype`
