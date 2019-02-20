@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	softVersion = 0.1
+	softVersion = 1.0
 	dumpDir     = "dump"
 )
 
@@ -108,9 +108,9 @@ var sudoerUID int
 func main() {
 	fmt.Print("\n")
 	// Banner
-	fmt.Print("###########################################################\n")
-	fmt.Printf("# Discord Cache Dump :: Version %0.1f :: TESTER'S RELEASE 5 #\n", softVersion)
-	fmt.Print("###########################################################\n\n")
+	fmt.Print("#####################################\n")
+	fmt.Printf("# Discord Cache Dump :: Version %0.1f #\n", softVersion)
+	fmt.Print("#####################################\n\n")
 
 	user, err := user.Current()
 	if err != nil {
