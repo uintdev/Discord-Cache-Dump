@@ -1,5 +1,5 @@
 # Discord Cache Dump
-<img src="https://raw.githubusercontent.com/NodePoint/Discord-Cache-Dump/master/screenshot.png" style="width:50%;" alt="Demo">
+<img src="https://raw.githubusercontent.com/NodePoint/Discord-Cache-Dump/master/screenshot.png" width="50%" alt="Demo">
 
 ## About
 
