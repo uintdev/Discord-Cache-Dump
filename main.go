@@ -189,7 +189,7 @@ func main() {
 
 	// Discord client build names
 	discordBuildName := map[int]string{
-		0: "Normal",
+		0: "Stable",
 		1: "PTB",
 		2: "Canary",
 		3: "Development",
