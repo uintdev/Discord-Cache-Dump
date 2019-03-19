@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -15,7 +17,7 @@ import (
 )
 
 const (
-	softVersion = 1.0
+	softVersion = "1.1"
 	dumpDir     = "dump"
 )
 
@@ -35,15 +37,8 @@ func exitNewLine() string {
 // Check for root, as running the program with it can change the path
 func rootCheck(tuid int) {
 	if tuid == 0 {
-		if platform != "darwin" {
-			fmt.Print("[NOTICE] This program is running as root\n")
-			fmt.Print("[...] The logged in user will be used.\n\n")
-		}
-	} else {
-		if platform == "darwin" {
-			fmt.Printf("[ERROR] Due to file permissions, this must be ran as root on macOS%s", exitNewLine())
-			os.Exit(1)
-		}
+		fmt.Print("[NOTICE] This program is running as root\n")
+		fmt.Print("[...] The logged in user will be used.\n\n")
 	}
 }
 
@@ -58,8 +53,106 @@ var unreadableRes int64
 var overallSize int64
 var spareStorage int64
 
+// Extract cache files (for GNU/Linux)
+func fileExtractor(contents []byte) []byte {
+	var magicNumber string
+	formatLock := false
+	sanitiseLock := false
+	re := regexp.MustCompile("^[a-zA-Z0-9_\\-:/.%?&=]*$")
+
+	var extractDat []byte
+	extractDat = contents
+
+	// Clean ending
+	magicNumber = "\xd8\x41\x0d\x97\x45\x6f\xfa\xf4\x01\x00"
+	extractRequired := bytes.Contains(extractDat, []byte(magicNumber))
+	if extractRequired {
+		// Remove end bytes
+		extractDat = bytes.SplitN(extractDat, []byte(magicNumber), 2)[0]
+	}
+
+	// There are a few file types that are missing data we would need
+	// in order to extract them the way we intend to do so.
+	// In that case, we rely on their magic numbers.
+
+	// Clean JPG/JPEG
+	if !formatLock {
+		magicNumber = "\xff\xd8\xff"
+		magicNumberIndex := bytes.Index(contents, []byte(magicNumber))
+		extractRequired = false
+		if magicNumberIndex > -1 {
+			if bytes.Contains(contents[magicNumberIndex:magicNumberIndex+3], []byte(magicNumber)) {
+				if len(contents[magicNumberIndex+6:magicNumberIndex+10]) == 4 {
+					if bytes.Equal(contents[magicNumberIndex+6:magicNumberIndex+10], []byte("\x4a\x46\x49\x46")) {
+						extractRequired = true
+					}
+				}
+			}
+		}
+		if extractRequired {
+			formatLock = true
+			extractDat = bytes.SplitN(extractDat, []byte(magicNumber), 2)[1]
+			extractDat = append([]byte(magicNumber), extractDat...)
+		}
+	}
+
+	// Clean WEBP
+	if !formatLock {
+		magicNumber = "\x00\x00\x57\x45\x42\x50\x56\x50\x38"
+		extractRequired = bytes.Contains(contents, []byte(magicNumber))
+		if !extractRequired {
+			magicNumber = "\x01\x00\x57\x45\x42\x50\x56\x50\x38"
+			extractRequired = bytes.Contains(contents, []byte(magicNumber))
+		}
+		if extractRequired {
+			formatLock = true
+			magicNumber = "\x52\x49\x46\x46"
+			extractDat = bytes.SplitN(extractDat, []byte(magicNumber), 2)[1]
+			extractDat = append([]byte(magicNumber), extractDat...)
+		}
+	}
+
+	// Extract the rest
+	if !formatLock && len(extractDat[12:13]) == 1 {
+		uriLengthInt := extractDat[12:13]
+		uriLengthConv := fmt.Sprintf("%d", uriLengthInt[0])
+		uriLength, err := strconv.Atoi(uriLengthConv)
+		if err == nil {
+			if uriLength > 0 && len(extractDat[24:24+uriLength]) == uriLength && re.MatchString(string(extractDat[24 : 24+uriLength][0])) {
+				fileContent := extractDat[24+uriLength:]
+				extractDat = fileContent
+			} else {
+				extractDat = contents
+				sanitiseLock = true
+			}
+		} else {
+			extractDat = contents
+			sanitiseLock = true
+		}
+	}
+
+	// Clean extra data
+	magicNumber = "\x6b\x67\x53\x65\x01\xbf\x97\xeb"
+	extractRequired = bytes.Contains(extractDat, []byte(magicNumber))
+	if !sanitiseLock && extractRequired {
+		extractDatTmp := bytes.Split(extractDat, []byte(magicNumber))
+		var extractDatBuilder []byte
+		for i := 0; i < len(extractDatTmp); i++ {
+			if i > 0 {
+				extractDatBuilder = append(extractDatBuilder, extractDatTmp[i][24:]...)
+			}
+		}
+		extractDat = extractDatBuilder
+	}
+
+	extractedConvByte := extractDat
+
+	return extractedConvByte
+}
+
 // Copy source file to destination
 func copyFile(from string, to string, permuid int) {
+	var resData []byte
 	input, err := ioutil.ReadFile(from)
 	if err != nil {
 		/*
@@ -70,12 +163,18 @@ func copyFile(from string, to string, permuid int) {
 		return
 	}
 
-	err = ioutil.WriteFile(to, input, 0644)
+	if platform == "linux" {
+		resData = fileExtractor(input)
+	} else {
+		resData = input
+	}
+
+	err = ioutil.WriteFile(to, resData, 0644)
 	if err != nil {
 		fmt.Printf("\n[ERROR] Write error: %s\n", err)
 		return
 	}
-	// If ran as root as a sudoer on Linux or macOS, it's going to be root:root, so we change it to what it really should be
+	// If ran as root as a sudoer on GNU/Linux or macOS, it's going to be root:root, so we change it to what it really should be
 	if platform != "windows" {
 		os.Chown(to, permuid, permuid)
 	}
@@ -107,10 +206,11 @@ var sudoerUID int
 
 func main() {
 	fmt.Print("\n")
+
 	// Banner
-	fmt.Print("#####################################\n")
-	fmt.Printf("# Discord Cache Dump :: Version %0.1f #\n", softVersion)
-	fmt.Print("#####################################\n\n")
+	fmt.Print("#######################################\n")
+	fmt.Printf("# Discord Cache Dump :: Version %s #\n", softVersion)
+	fmt.Print("#######################################\n\n")
 
 	user, err := user.Current()
 	if err != nil {
@@ -283,13 +383,13 @@ func main() {
 	// Check and create dump directory structure
 	timeDateStamp := timeDate()
 	if _, err := os.Stat(dumpDir + "/"); os.IsNotExist(err) {
-		os.Mkdir(dumpDir, 0644)
+		os.Mkdir(dumpDir, 0755)
 		if platform != "windows" {
 			os.Chown(dumpDir, sudoerUID, sudoerUID)
 		}
 	}
 	if _, err := os.Stat(dumpDir + "/" + timeDateStamp + "/"); os.IsNotExist(err) {
-		os.Mkdir(dumpDir+"/"+timeDateStamp, 0644)
+		os.Mkdir(dumpDir+"/"+timeDateStamp, 0755)
 		if platform != "windows" {
 			os.Chown(dumpDir+"/"+timeDateStamp, sudoerUID, sudoerUID)
 		}
@@ -299,7 +399,7 @@ func main() {
 	for i := 0; i < len(discordBuildDir); i++ {
 		if len(cachedFile[i]) > 0 {
 			if _, err := os.Stat(dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/"); os.IsNotExist(err) {
-				os.Mkdir(dumpDir+"/"+timeDateStamp+"/"+discordBuildName[i], 0644)
+				os.Mkdir(dumpDir+"/"+timeDateStamp+"/"+discordBuildName[i], 0755)
 				if platform != "windows" {
 					os.Chown(dumpDir+"/"+timeDateStamp+"/"+discordBuildName[i], sudoerUID, sudoerUID)
 				}
@@ -355,5 +455,4 @@ func main() {
 	} else {
 		fmt.Printf("Saved: %s/%s/%s%s", curDir, dumpDir, timeDateStamp, exitNewLine())
 	}
-
 }

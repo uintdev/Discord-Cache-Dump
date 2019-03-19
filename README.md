@@ -3,11 +3,11 @@
 
 ## About
 
-Discord Cache Dump is a tool that gathers the cache of all known Electron Discord client build types, copies it into its own directory, and gives them their appropriate file extensions.
+Discord Cache Dump is a tool that gathers the cache of all known Electron Discord client builds, copies into their corresponding build directories, and gives the files their appropriate file extensions.
 
 ## Features
 
-- Detection of known Discord build types
+- Detection of known Discord build types (can do multiple in a single run)
 - Discloses count of amount of files it is unable to gather at the time for that particular build
 - Supports Windows, GNU/Linux, and macOS
 - Checks storage available where the program is being ran before copying
@@ -15,21 +15,24 @@ Discord Cache Dump is a tool that gathers the cache of all known Electron Discor
 
 ## Known limitations
 
-- The files that the Discord client process is utilising at the time cannot be copied over as it involves opening
-  - It is advised to just kill the client you wish to copy files from that contains strings of *potentially sensitive* data
-- macOS requires root due to how permissions are set
-  - The tool does get the sudoer user as well as UID for permission changing purposes, so no need to worry about that
+- The files that a Discord client process is utilising at the time cannot be copied over as it involves opening
+  - It is advised to kill the parent process of the client(s) you wish to copy files from that contains strings of *potentially sensitive* data
+- Due to how cache is stored in later GNU/Linux builds, this program includes a file extraction function 
+  - .MOV files cannot be completely extracted
+  - Some .GZ (gzip) files containing mentions of .JS cannot be completely extracted
+  - Some cache files containing request and response data cannot be completely extracted
+  - Cache files that cannot be handled at all will not have their contents altered as they are being copied over
 
 ## Always opened files
-The following files are known to be constantly used by Discord and so cannot be copied while that Discord client is running.
+The following files are known to be used constantly by Discord and so cannot be copied while that Discord client is running.
 
 | File   | Contents                                                                                         |
 | ------ | ------------------------------------------------------------------------------------------------ |
-| index  | Unknown                                                                                          |
+| index  | Cache index                                                                                      |
 | data_0 | Unknown                                                                                          |
 | data_1 | Full URLs to friendly URLs, API, avatars, emojis, embeds, attachments, uploads (self and others) |
 | data_2 | Code, assets (png, svg)                                                                          |
-| data_3 | Certificates, hostnames, IP addresses, image EXIF, reference to javascript assets (webpack)      |
+| data_3 | Certificates, hostnames, IP addresses, image EXIF, references to javascript assets (webpack)     |
 
 ## Prerequisites
 
@@ -41,19 +44,22 @@ In order to compile the tool, there are a few things required to get it set up.
 
 ## Usage
 
-| Platform  | Command             |
-| --------- | ------------------- |
-| Windows   | `dcd_windows.exe`   |
-| GNU/Linux | `./dcd_linux`       |
-| macOS     | `sudo ./dcd_darwin` |
+| Platform  | Command                                                |
+| --------- | ------------------------------------------------------ |
+| Windows   | `dcd_windows.exe`                                      |
+| GNU/Linux | `./dcd_linux` (run `chmod +x ./dcd_linux` initially)   |
+| macOS     | `./dcd_darwin` (run `chmod +x ./dcd_darwin` initially) |
 
 ## Credits
-| User                                        | Contribution                                        |
-| ------------------------------------------- | --------------------------------------------------- |
-| [NodePoint](https://github.com/NodePoint)   | Development, Windows and GNU/Linux platform testing |
-| [NotZoeyDev](https://github.com/NotZoeyDev) | macOS platform testing                              |
+| User                                        | Contribution                                                                        |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [NodePoint](https://github.com/NodePoint)   | Research &amp; analysis, development, Windows, GNU/Linux and macOS platform testing |
+| [NotZoeyDev](https://github.com/NotZoeyDev) | macOS platform testing                                                              |
+| [@not_utf16](https://twitter.com/not_utf16) | GNU/Linux platform testing                                                          |
 
 ## Tested
-- Windows 10 Pro
+- Windows 10
+- Ubuntu (GNU/Linux)
 - Kali Linux (GNU/Linux)
+- Solus (GNU/Linux)
 - macOS
