@@ -1,5 +1,5 @@
 # Discord Cache Dump
-<img src="https://raw.githubusercontent.com/NodePoint/Discord-Cache-Dump/master/screenshot.png" width="50%" alt="Demo">
+<img src="https://raw.githubusercontent.com/NodePoint/Discord-Cache-Dump/master/banner.png" width="50%" alt="Demo">
 
 ## About
 
@@ -12,6 +12,8 @@ Discord Cache Dump is a tool that gathers the cache of all known Electron Discor
 - Supports Windows, GNU/Linux, and macOS
 - Checks storage available where the program is being ran before copying
 - Dumps are timestamped along with the cache being in their own build type directories
+- Select specific build type with the `--build` (or `-b`) flag (i.e. `./dcd --build=stable`)
+- Non-interactive mode by using the `--noninteractive` (or `-n`) flag (i.e. `./dcd --noninteractive`) 
 
 ## Known limitations
 
@@ -41,6 +43,7 @@ In order to compile the tool, there are a few things required to get it set up.
 - Go (compiling)
 - [h2non/filetype](https://github.com/h2non/filetype) (recognition of file types and extensions): `go get github.com/h2non/filetype`
 - [ricochet2200/go-disk-usage](https://github.com/ricochet2200/go-disk-usage) (disk information): `go get github.com/ricochet2200/go-disk-usage/du`
+- [jessevdk/go-flags](https://github.com/jessevdk/go-flags) (flag handling): `github.com/jessevdk/go-flags`
 
 ## Usage
 
