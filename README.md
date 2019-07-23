@@ -12,7 +12,7 @@ Discord Cache Dump is a tool that gathers the cache of all known Electron Discor
 - Supports Windows, GNU/Linux, and macOS
 - Checks storage available where the program is being ran before copying
 - Dumps are timestamped along with the cache being in their own build type directories
-- Select specific build type with the `--build` (or `-b`) flag (i.e. `./dcd --build=stable`)
+- Select specific build type with the `--build` (or `-b`) flag (i.e. `./dcd --build stable`)
 - Non-interactive mode by using the `--noninteractive` (or `-n`) flag (i.e. `./dcd --noninteractive`) 
 
 ## Known limitations
