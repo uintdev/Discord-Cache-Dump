@@ -13,11 +13,12 @@ import (
 	"time"
 
 	"github.com/h2non/filetype"
+	"github.com/jessevdk/go-flags"
 	"github.com/ricochet2200/go-disk-usage/du"
 )
 
 const (
-	softVersion = "1.1"
+	softVersion = "1.2"
 	dumpDir     = "dump"
 )
 
@@ -198,6 +199,16 @@ func freeStorage(path string) {
 	return
 }
 
+// Slice search
+func searchSlice(y []string, z string) bool {
+	for _, n := range y {
+		if z == n {
+			return true
+		}
+	}
+	return false
+}
+
 // Initialisation of system information variables
 var uid int
 var userName string
@@ -205,12 +216,59 @@ var homePath string
 var sudoerUID int
 
 func main() {
-	fmt.Print("\n")
+
+	fmt.Println()
+
+	// Discord client build names
+	discordBuildName := map[int]string{
+		0: "Stable",
+		1: "PTB",
+		2: "Canary",
+		3: "Development",
+	}
+	// Discord client build folder names
+	discordBuildDir := map[int]string{
+		0: "discord",
+		1: "discordptb",
+		2: "discordcanary",
+		3: "discorddevelopment",
+	}
+	// Cache paths for each platform
+	cachePath := map[string]string{
+		"linux":   "%s/.config/%s/Cache/",
+		"darwin":  "%s/Library/Application Support/%s/Cache/",
+		"windows": "%s\\AppData\\Roaming\\%s\\Cache\\",
+	}
+
+	// Initialise a few maps
+	pathStatus := make(map[int]bool)
+	cachedFile := make(map[int]map[int]string)
+
+	// Initialise flags
+	var discordBuildListSlice []string
+	var discordBuildListOption string
+	var discordBuildListEntryName string
+	var discordBuildListEntryDir string
+
+	for i := 0; i < len(discordBuildName); i++ {
+		discordBuildListSlice = append(discordBuildListSlice, strings.ToLower(discordBuildName[i]))
+	}
+
+	var opts struct {
+		Build          string `short:"b" long:"build" description:"Select build type: stable, ptb, canary, development"`
+		Noninteractive bool   `short:"n" long:"noninteractive" description:"Non-interactive -- no 'enter' key required"`
+	}
+
+	_, err := flags.Parse(&opts)
+
+	if err != nil {
+		os.Exit(0)
+	}
 
 	// Banner
-	fmt.Print("#######################################\n")
+	fmt.Print("#####################################\n")
 	fmt.Printf("# Discord Cache Dump :: Version %s #\n", softVersion)
-	fmt.Print("#######################################\n\n")
+	fmt.Print("#####################################\n\n")
 
 	user, err := user.Current()
 	if err != nil {
@@ -275,6 +333,29 @@ func main() {
 	}
 
 	fmt.Printf("Logged in as: %s\n\n", userName)
+	// Build flag
+	if opts.Build != "" {
+		discordBuildListOption = strings.ToLower(opts.Build)
+		if !searchSlice(discordBuildListSlice, discordBuildListOption) {
+			fmt.Printf("[ERROR] Build type does not exist %s", exitNewLine())
+			os.Exit(1)
+		} else {
+			fmt.Printf("Build selected: %s\n\n", discordBuildListOption)
+			for i := 0; i < len(discordBuildDir); i++ {
+				if discordBuildListOption == strings.ToLower(discordBuildName[i]) {
+					discordBuildListEntryName = discordBuildName[i]
+					discordBuildListEntryDir = discordBuildDir[i]
+					break
+				}
+			}
+			discordBuildName = map[int]string{
+				0: discordBuildListEntryName,
+			}
+			discordBuildDir = map[int]string{
+				0: discordBuildListEntryDir,
+			}
+		}
+	}
 
 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 	fmt.Print("!! A few files (index, data_0-3) are in use by Discord while    !!\n")
@@ -284,33 +365,10 @@ func main() {
 	fmt.Print("!! while copying the files over.                                !!\n")
 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 
-	fmt.Print("Press enter to continue ...\n")
-	fmt.Scanln()
-
-	// Discord client build names
-	discordBuildName := map[int]string{
-		0: "Stable",
-		1: "PTB",
-		2: "Canary",
-		3: "Development",
+	if opts.Noninteractive == false {
+		fmt.Print("Press enter to continue ...\n")
+		fmt.Scanln()
 	}
-	// Discord client build folder names
-	discordBuildDir := map[int]string{
-		0: "discord",
-		1: "discordptb",
-		2: "discordcanary",
-		3: "discorddevelopment",
-	}
-	// Cache paths for each platform
-	cachePath := map[string]string{
-		"linux":   "%s/.config/%s/Cache/",
-		"darwin":  "%s/Library/Application Support/%s/Cache/",
-		"windows": "%s\\AppData\\Roaming\\%s\\Cache\\",
-	}
-
-	// Initialise a few maps
-	pathStatus := make(map[int]bool)
-	cachedFile := make(map[int]map[int]string)
 
 	fmt.Print("Checking for existing cache directories ...\n\n")
 
@@ -420,6 +478,9 @@ func main() {
 				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
 				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableRes)
 				unreadableResCount := int64(len(cachedFile[i])) - unreadableRes
+				if unreadableResCount < 0 {
+					unreadableResCount = 0
+				}
 				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", unreadableResCount, discordBuildName[i])
 			}
 		}
