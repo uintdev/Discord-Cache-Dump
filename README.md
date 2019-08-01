@@ -1,5 +1,5 @@
 # Discord Cache Dump
-<img src="https://raw.githubusercontent.com/NodePoint/Discord-Cache-Dump/master/banner.png" alt="Banner with logo">
+<img src="banner.png" alt="Banner with logo">
 
 ## About
 
