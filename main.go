@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	softVersion = "1.2"
+	softVersion = "1.2.1"
 	dumpDir     = "dump"
 )
 
@@ -214,6 +214,7 @@ var uid int
 var userName string
 var homePath string
 var sudoerUID int
+var unreadableResCount int64
 
 func main() {
 
@@ -266,9 +267,9 @@ func main() {
 	}
 
 	// Banner
-	fmt.Print("#####################################\n")
+	fmt.Print("#######################################\n")
 	fmt.Printf("# Discord Cache Dump :: Version %s #\n", softVersion)
-	fmt.Print("#####################################\n\n")
+	fmt.Print("#######################################\n\n")
 
 	user, err := user.Current()
 	if err != nil {
@@ -477,11 +478,13 @@ func main() {
 			if unreadableRes > 0 {
 				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
 				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableRes)
-				unreadableResCount := int64(len(cachedFile[i])) - unreadableRes
+				unreadableResCount = int64(len(cachedFile[i])) - unreadableRes
 				if unreadableResCount < 0 {
 					unreadableResCount = 0
 				}
 				fmt.Printf("[...] Actually copied %d cache files from Discord %s\n", unreadableResCount, discordBuildName[i])
+			} else {
+				unreadableResCount = int64(len(cachedFile[i]))
 			}
 		}
 	}
@@ -506,7 +509,7 @@ func main() {
 					}
 				}
 			}
-			fmt.Printf("%d out of %d identified for Discord %s\n\n", identificationCount, len(cachedFile[i]), discordBuildName[i])
+			fmt.Printf("%d out of %d identified for Discord %s\n\n", identificationCount, unreadableResCount, discordBuildName[i])
 		}
 	}
 
