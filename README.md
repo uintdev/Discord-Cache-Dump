@@ -43,7 +43,7 @@ In order to compile the tool, there are a few things required to get it set up.
 - Go (compiling)
 - [h2non/filetype](https://github.com/h2non/filetype) (recognition of file types and extensions): `go get github.com/h2non/filetype`
 - [ricochet2200/go-disk-usage](https://github.com/ricochet2200/go-disk-usage) (disk information): `go get github.com/ricochet2200/go-disk-usage/du`
-- [jessevdk/go-flags](https://github.com/jessevdk/go-flags) (flag handling): `github.com/jessevdk/go-flags`
+- [jessevdk/go-flags](https://github.com/jessevdk/go-flags) (flag handling): `go get github.com/jessevdk/go-flags`
 
 ## Usage
 
