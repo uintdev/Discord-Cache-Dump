@@ -4,6 +4,7 @@
 <p align="center">
     A cross-platform command line Discord cache collection tool
     <br>
+    <br>
     <a href="releases/latest" title="Latest release"><img src="https://img.shields.io/github/v/release/uintdev/Discord-Cache-Dump" alt="Version"></a>
     &nbsp;&nbsp;
     <img src="https://img.shields.io/github/stars/uintdev/Discord-Cache-Dump.svg?logo=github" alt="Stars">
