@@ -69,9 +69,9 @@ In order to compile the tool, there are a few things required to get it set up.
 ## Credits
 | User                                        | Contribution                                                                        |
 | ------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [uintdev](https://github.com/uintdev)   | Research &amp; analysis, development, Windows, GNU/Linux and macOS platform testing |
+| [uintdev](https://github.com/uintdev)       | Research &amp; analysis, development, Windows, GNU/Linux and macOS platform testing |
 | [NotZoeyDev](https://github.com/NotZoeyDev) | macOS platform testing                                                              |
-| [@not_utf16](https://twitter.com/not_utf16) | GNU/Linux platform testing                                                          |
+| [utf-4096](https://github.com/utf-4096)     | GNU/Linux platform testing                                                          |
 
 ## Tested
 - Windows 10
