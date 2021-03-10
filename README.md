@@ -1,5 +1,19 @@
 # Discord Cache Dump
 <img src="banner.png" alt="Banner with logo">
+<br>
+<br>
+<p align="center">
+    A cross-platform command line Discord cache collection tool
+    <br>
+    <br>
+    <a href="releases/latest" title="Latest release"><img src="https://img.shields.io/github/v/release/uintdev/Discord-Cache-Dump" alt="Version"></a>
+    &nbsp;&nbsp;
+    <img src="https://img.shields.io/github/stars/uintdev/Discord-Cache-Dump.svg?logo=github" alt="Stars">
+    &nbsp;&nbsp;
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/uintdev/qrserv" alt="License"></a>
+    <br>
+    <a href="https://ko-fi.com/uintdev" title="ko-fi"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Donate" height="80" width="300"></a>
+</p>
 
 ## About
 
