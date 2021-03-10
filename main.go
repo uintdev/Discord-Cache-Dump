@@ -474,10 +474,10 @@ func main() {
 				copyFile(fromPath+cachedFile[i][it], toPath, sudoerUID)
 			}
 
-			// Unable to copy client-critial cache
+			// Unable to copy client-critical cache
 			if unreadableRes > 0 {
-				fmt.Printf("[NOTICE] Cannot read client-critial cache while Discord %s is running\n", discordBuildName[i])
-				fmt.Printf("[...] Unable to read %d client-critial cache file(s)\n", unreadableRes)
+				fmt.Printf("[NOTICE] Cannot read client-critical cache while Discord %s is running\n", discordBuildName[i])
+				fmt.Printf("[...] Unable to read %d client-critical cache file(s)\n", unreadableRes)
 				unreadableResCount = int64(len(cachedFile[i])) - unreadableRes
 				if unreadableResCount < 0 {
 					unreadableResCount = 0
