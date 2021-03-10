@@ -7,9 +7,9 @@
     <br>
     <a href="releases/latest" title="Latest release"><img src="https://img.shields.io/github/v/release/uintdev/Discord-Cache-Dump" alt="Version"></a>
     &nbsp;&nbsp;
-    <img src="https://img.shields.io/github/stars/uintdev/Discord-Cache-Dump.svg?logo=github" alt="Stars">
+    <a href="https://github.com/uintdev/Discord-Cache-Dump" title="Stars"><img src="https://img.shields.io/github/stars/uintdev/Discord-Cache-Dump.svg?logo=github" alt="Stars"></a>
     &nbsp;&nbsp;
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/uintdev/qrserv" alt="License"></a>
+    <a href="LICENSE" title="License"><img src="https://img.shields.io/github/license/uintdev/qrserv" alt="License"></a>
     <br>
     <a href="https://ko-fi.com/uintdev" title="ko-fi"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Donate" height="80" width="300"></a>
 </p>
