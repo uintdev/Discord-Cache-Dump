@@ -234,7 +234,7 @@ func main() {
 		}
 	}
 	if pathStatusSuccessCount == 0 {
-		fmt.Printf("No cache found -- is Discord installed?%s", DCDUtils.ExitNewLine())
+		fmt.Printf("No cache found -- ensure Discord is installed and had been ran at least once%s", DCDUtils.ExitNewLine())
 		os.Exit(0)
 	} else {
 		fmt.Print("\n")
