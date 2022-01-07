@@ -120,7 +120,7 @@ func CopyFile(from string, to string, permuid int, unreadableCount int64) int64 
 		return unreadableCount + 1
 	}
 
-	if platform == "linux" {
+	if platform != "windows" {
 		resData = FileExtractor(input)
 	} else {
 		resData = input
