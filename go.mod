@@ -1,4 +1,4 @@
-module discordcachedumper
+module discordcachedump
 
 go 1.17
 
