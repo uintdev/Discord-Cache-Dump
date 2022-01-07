@@ -368,7 +368,7 @@ func main() {
 	fmt.Print("!! while copying the files over.                                !!\n")
 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 
-	if opts.Noninteractive == false {
+	if !opts.Noninteractive {
 		fmt.Print("Press enter to continue ...\n")
 		fmt.Scanln()
 	}
