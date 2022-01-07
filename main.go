@@ -92,13 +92,13 @@ func main() {
 	user, err := user.Current()
 	if err != nil {
 		fmt.Printf("[ERROR] Failed to obtain user: %s%s", err, DCDUtils.ExitNewLine())
-		os.Exit(1)
+		os.Exit(6)
 	} else {
 		if platform != "windows" {
 			uidConv, err := strconv.Atoi(user.Uid)
 			if err != nil {
 				fmt.Printf("[ERROR] Unable to obtain UID%s", DCDUtils.ExitNewLine())
-				os.Exit(1)
+				os.Exit(5)
 			}
 			uid = uidConv
 		} else {
@@ -125,7 +125,7 @@ func main() {
 			sudoerUID, err = strconv.Atoi(sudoerUIDi)
 			if err != nil {
 				fmt.Printf("[ERROR] Unable to convert UID to INT%s", DCDUtils.ExitNewLine())
-				os.Exit(1)
+				os.Exit(4)
 			}
 		}
 
@@ -148,7 +148,7 @@ func main() {
 		userName = strings.Split(userName, "\\")[1]
 	} else {
 		fmt.Printf("[ERROR] Unsupported platform: %s%s", platform, DCDUtils.ExitNewLine())
-		os.Exit(1)
+		os.Exit(3)
 	}
 
 	fmt.Printf("Logged in as: %s\n\n", userName)
@@ -209,7 +209,7 @@ func main() {
 			cacheListing, err := ioutil.ReadDir(filePath)
 			if err != nil {
 				fmt.Printf("[ERROR] Unable to read directory for Discord %s%s", discordBuildName[i], DCDUtils.ExitNewLine())
-				os.Exit(1)
+				os.Exit(2)
 			}
 			// Go through the list of files present in a cache directory
 			if len(cacheListing) > 0 {

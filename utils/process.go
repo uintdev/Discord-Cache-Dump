@@ -129,7 +129,7 @@ func CopyFile(from string, to string, permuid int, unreadableCount int64) int64 
 	err = ioutil.WriteFile(to, resData, 0644)
 	if err != nil {
 		fmt.Printf("\n[ERROR] Write error: %s\n", err)
-		os.Exit(2)
+		os.Exit(7)
 	}
 	// If ran as root as a sudoer on GNU/Linux or macOS, it's going to be root:root, so we change it to what it really should be
 	if platform != "windows" {
