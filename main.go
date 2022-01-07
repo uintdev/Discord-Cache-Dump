@@ -192,7 +192,6 @@ func sizeStore(path string) {
 		return
 	}
 	overallSize += int64(len(data))
-	return
 }
 
 // Amount of free space on the partition the program is running off of (in bytes)
@@ -200,7 +199,6 @@ func freeStorage(path string) {
 	usage := du.NewDiskUsage(path)
 	free := usage.Free()
 	spareStorage = int64(free)
-	return
 }
 
 // Slice search
