@@ -59,7 +59,7 @@ func fileExtractor(contents []byte) []byte {
 	var magicNumber string
 	formatLock := false
 	sanitiseLock := false
-	re := regexp.MustCompile("^[a-zA-Z0-9_\\-:/.%?&=]*$")
+	re := regexp.MustCompile(`^[a-zA-Z0-9_\-:/.%?&=]*$`)
 
 	var extractDat []byte
 	extractDat = contents
@@ -179,7 +179,7 @@ func copyFile(from string, to string, permuid int) {
 	if platform != "windows" {
 		os.Chown(to, permuid, permuid)
 	}
-	
+
 	// Preserve file modified timestamp
 	info, _ := os.Stat(from)
 	_ = os.Chtimes(to, info.ModTime(), info.ModTime())
