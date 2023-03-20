@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-// Extract cache files (for GNU/Linux)
+// Extract cache files (for GNU/Linux and macOS)
 func FileExtractor(contents []byte) []byte {
 	var magicNumber string
 	formatLock := false
