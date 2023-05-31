@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	softVersion = "1.2.3"
+	softVersion = "1.2.4"
 	dumpDir     = "dump"
 )
 
