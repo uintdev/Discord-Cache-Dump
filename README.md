@@ -62,11 +62,11 @@ In order to compile the tool, there are a few things required to get it set up.
 
 ## Usage
 
-| Platform  | Command                                                |
-| --------- | ------------------------------------------------------ |
-| Windows   | `dcd_windows.exe`                                      |
-| GNU/Linux | `./dcd_linux` (run `chmod +x ./dcd_linux` initially)   |
-| macOS     | `./dcd_darwin` (run `chmod +x ./dcd_darwin` initially) |
+| Platform  | Command                                                            |
+| --------- | ------------------------------------------------------------------ |
+| Windows   | `dcd_windows.exe`                                                  |
+| GNU/Linux | `./dcd_linux` (run `chmod +x ./dcd_linux` initially)               |
+| macOS     | `./dcd_darwin_arm64` (run `chmod +x ./dcd_darwin_arm64` initially) |
 
 ## Credits
 
