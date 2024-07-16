@@ -8,7 +8,37 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
+
+// Formulate the end of the flatpak package name to then use as a normal path
+func FlatpakPath(buildType string) string {
+	resultingBuildSegment := ""
+	splitBuildName := strings.Split(buildType, "discord")
+	if len(splitBuildName) > 1 {
+		if splitBuildName[1] != "" {
+			resultingBuildSegment = strings.Join([]string{"discord", splitBuildName[1]}, " ")
+		} else {
+			resultingBuildSegment = buildType
+		}
+	} else {
+		resultingBuildSegment = buildType
+	}
+
+	titleCaser := cases.Title(language.English)
+	casedBuildName := titleCaser.String(resultingBuildSegment)
+
+	packageNameSuffix := strings.Replace(casedBuildName, " ", "", -1)
+
+	path := "%s/.var/app/com.discordapp.%s/config/%s/Cache/Cache_Data/"
+	path = fmt.Sprintf(path, "%s", packageNameSuffix, "%s")
+
+	return path
+}
+
 
 // Extract cache files (for GNU/Linux and macOS)
 func FileExtractor(contents []byte) []byte {

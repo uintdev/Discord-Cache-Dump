@@ -22,6 +22,7 @@ Discord Cache Dump is a tool that gathers the cache of all known Electron Discor
 ## Features
 
 -   Detection of known Discord build types (can do multiple in a single run)
+-   Flatpak support using `--flatpak` (or `-f`) flag (i.e. `./dcd --flatpak`)
 -   Discloses count of amount of files it is unable to gather at the time for that particular build
 -   Supports Windows, GNU/Linux, and macOS
 -   Checks storage available where the program is being ran before copying

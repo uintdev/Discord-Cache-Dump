@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	softVersion = "1.2.4"
+	softVersion = "1.3.0"
 	dumpDir     = "dump"
 )
 
@@ -75,6 +75,7 @@ func main() {
 
 	var opts struct {
 		Build          string `short:"b" long:"build" description:"Select build type: stable, ptb, canary, development"`
+		Flatpak        bool   `short:"f" long:"flatpak" description:"Target flatpak builds (Linux only)"`
 		Noninteractive bool   `short:"n" long:"noninteractive" description:"Non-interactive -- no 'enter' key required"`
 	}
 
@@ -189,11 +190,20 @@ func main() {
 		fmt.Scanln()
 	}
 
+	flatpakMode := opts.Flatpak && platform == "linux"
+	if flatpakMode {
+		fmt.Print("Flatpak mode\n")
+	}
+
 	fmt.Print("Checking for existing cache directories ...\n\n")
 
 	// Check if directories exist
 	for i := 0; i < len(discordBuildDir); i++ {
-		filePath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
+		filePathRaw := cachePath[platform]
+		if flatpakMode {
+			filePathRaw = DCDUtils.FlatpakPath(discordBuildDir[i])
+		}
+		filePath := fmt.Sprintf(filePathRaw, homePath, discordBuildDir[i])
 		if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 			fmt.Printf("Found: Discord %s\n", discordBuildName[i])
 			pathStatus[i] = true
@@ -205,7 +215,11 @@ func main() {
 	// Check if the directories are empty and store names of cached files
 	for i := 0; i < len(discordBuildDir); i++ {
 		if pathStatus[i] {
-			filePath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
+			filePathRaw := cachePath[platform]
+			if flatpakMode {
+				filePathRaw = DCDUtils.FlatpakPath(discordBuildDir[i])
+			}
+			filePath := fmt.Sprintf(filePathRaw, homePath, discordBuildDir[i])
 			cacheListing, err := ioutil.ReadDir(filePath)
 			if err != nil {
 				fmt.Printf("[ERROR] Unable to read directory for Discord %s%s", discordBuildName[i], DCDUtils.ExitNewLine())
@@ -216,7 +230,7 @@ func main() {
 				cachedFile[i] = make(map[int]string)
 				for k, v := range cacheListing {
 					cachedFile[i][k] = v.Name()
-					overallSize = DCDUtils.SizeStore(filePath + v.Name(), overallSize)
+					overallSize = DCDUtils.SizeStore(filePath+v.Name(), overallSize)
 				}
 				fmt.Printf("Discord %s :: found %d cached files\n", discordBuildName[i], len(cacheListing))
 			} else {
@@ -286,7 +300,11 @@ func main() {
 			fmt.Printf("Copying %d files from Discord %s ...\n", len(cachedFile[i]), discordBuildName[i])
 			for it := 0; it < len(cachedFile[i]); it++ {
 				// Build the paths to use during the copy operation
-				fromPath := fmt.Sprintf(cachePath[platform], homePath, discordBuildDir[i])
+				filePathRaw := cachePath[platform]
+				if flatpakMode {
+					filePathRaw = DCDUtils.FlatpakPath(discordBuildDir[i])
+				}
+				fromPath := fmt.Sprintf(filePathRaw, homePath, discordBuildDir[i])
 				toPath := dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/" + cachedFile[i][it]
 				// Copying the files one-by-one
 				unreadableRes = DCDUtils.CopyFile(fromPath+cachedFile[i][it], toPath, sudoerUID, unreadableRes)
