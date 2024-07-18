@@ -16,16 +16,12 @@ import (
 
 // Formulate the end of the flatpak package name to then use as a normal path
 func FlatpakPath(buildType string) string {
-	resultingBuildSegment := ""
+	resultingBuildSegment := buildType
 	splitBuildName := strings.Split(buildType, "discord")
 	if len(splitBuildName) > 1 {
 		if splitBuildName[1] != "" {
 			resultingBuildSegment = strings.Join([]string{"discord", splitBuildName[1]}, " ")
-		} else {
-			resultingBuildSegment = buildType
 		}
-	} else {
-		resultingBuildSegment = buildType
 	}
 
 	titleCaser := cases.Title(language.English)
