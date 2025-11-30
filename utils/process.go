@@ -3,7 +3,6 @@ package DCDUtils
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"runtime"
@@ -137,7 +136,7 @@ func FileExtractor(contents []byte) []byte {
 func CopyFile(from string, to string, permuid int, unreadableCount int64) int64 {
 	var platform string = runtime.GOOS
 	var resData []byte
-	input, err := ioutil.ReadFile(from)
+	input, err := os.ReadFile(from)
 	if err != nil {
 		/*
 			We simply assume that the file it got to cannot be 'opened' because Discord's process is using it at the time.
@@ -152,7 +151,7 @@ func CopyFile(from string, to string, permuid int, unreadableCount int64) int64 
 		resData = input
 	}
 
-	err = ioutil.WriteFile(to, resData, 0644)
+	err = os.WriteFile(to, resData, 0644)
 	if err != nil {
 		fmt.Printf("\n[ERROR] Write error: %s\n", err)
 		os.Exit(7)

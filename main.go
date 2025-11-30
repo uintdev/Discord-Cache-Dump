@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"runtime"
@@ -220,7 +219,7 @@ func main() {
 				filePathRaw = DCDUtils.FlatpakPath(discordBuildDir[i])
 			}
 			filePath := fmt.Sprintf(filePathRaw, homePath, discordBuildDir[i])
-			cacheListing, err := ioutil.ReadDir(filePath)
+			cacheListing, err := os.ReadDir(filePath)
 			if err != nil {
 				fmt.Printf("[ERROR] Unable to read directory for Discord %s%s", discordBuildName[i], DCDUtils.ExitNewLine())
 				os.Exit(2)
@@ -335,7 +334,7 @@ func main() {
 			var identificationCount = 0
 			for it := 0; it < len(cachedFile[i]); it++ {
 				cachedFilePath := dumpDir + "/" + timeDateStamp + "/" + discordBuildName[i] + "/" + cachedFile[i][it]
-				buf, err := ioutil.ReadFile(cachedFilePath)
+				buf, err := os.ReadFile(cachedFilePath)
 				if err == nil {
 					kind, _ := filetype.Match(buf)
 					if kind != filetype.Unknown {
